@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>TODO</title>
+</head>
+
+<body>
+    <form id="todo-form">
+        <% if(update){ %>
+            <% console.log(update) %>
+            <input type="text" id="todo-item" placeholder="enter todo here" value="data">
+            <br><br>
+            <input type="button" value="update" onclick="updateTodo(1, true)">
+        <%}else{ %>
+            <input type="text" id="todo-item" placeholder="enter todo here">
+            <br><br>
+            <input type="submit" value="submit">
+        <%} %>
+    </form>
+
+    <br><br>
+
+    <h1>TODO ITEMS</h1>
+
+    <% todo_data.forEach((data, index)=> { %>
+        <h3>
+            <%= data %>
+        </h3>
+        <button id="update-<%= index %>" onclick="updateTodo(<%= index %>, false)">update</button>
+        <button id="delete-<%= index %>" onclick="deleteTodo(<%= index %>)">delete</button>
+        <%})%>
+
+            <script>
+
+                const todo = document.getElementById('todo-form');
+
+                todo.addEventListener('submit', (e) => {
+
+                    const todo_data = document.getElementById('todo-item').value;
+
+                    (async () => {
+                        await fetch('http://localhost:8000/', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ todo_item: todo_data })
+                        });
+                    })();
+
+                })
+
+                function deleteTodo(data) {
+                    (async () => {
+                        await fetch(`http://localhost:8000/${data}`, {
+                            method: 'DELETE',
+                        });
+                    })();
+
+                    location.reload()
+                }
+
+                function updateTodo(data, condition) {
+                    console.log(data, condition);
+                    (async () => {
+                        await fetch(`http://localhost:8000/?id=${data}`, {
+                            method: 'GET',
+                        });
+                    })();
+
+                }
+            </script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "project_2",
+  "version": "1.0.1",
+  "description": "learning http module with file module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jaimin sir",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

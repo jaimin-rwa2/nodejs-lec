@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Index</title>
+</head>
+
+<body>
+
+    <a href="http://localhost:8000/" id="start">index file</a><br>
+    <a href="http://localhost:8000/data">data file</a><br>
+
+
+    <br>
+    <br>
+    <h3 id="q1">
+        <%= header %>
+    </h3>
+
+    <div>
+        <% data_for.forEach( (data)=> { %>
+            <ul>
+                <li>
+                    <%= data %>
+                </li>
+            </ul>
+            <% })%>
+    </div>
+
+
+    <p>
+        <%= parf %>
+    </p>
+
+
+    <a href="#start"><button>go up</button></a>
+</body>
+
+</html>
