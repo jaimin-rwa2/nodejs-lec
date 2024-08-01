@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
+const cookieParse = require('cookie-parser')
 const { book_routes } = require('./src/routes/book')
 
 
@@ -8,11 +9,22 @@ const { book_routes } = require('./src/routes/book')
 const app = express()
 dotenv.config()
 app.use(express.json())
+app.use(cookieParse())
 app.use('/book', book_routes)
 
-app.get('/test', (req, res) => {
+app.get('/set', (req, res) => {
+
+    const time = "data with time 2"
+    res.cookie('data2', time, { maxAge: 10000 });
+
     res.json({
         msg: "my server is running"
+    })
+})
+
+app.get('/get', (req, res) => {
+    res.json({
+        msg: req.cookies
     })
 })
 

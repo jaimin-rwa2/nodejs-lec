@@ -22,7 +22,8 @@ const getBook = async (req, res) => {
         const data = await Book.findOne({ _id: id })
 
         res.json({
-            data: data
+            data: data,
+            data_id: data.id
         })
     } catch (error) {
         res.json({
@@ -36,11 +37,13 @@ const createBook = async (req, res) => {
     try {
         const req_body = req.body
 
+        const id = req_body['id']
         const name = req_body['name']
         const discription = req_body['discription']
         const auther = req_body['auther']
 
         await Book.create({
+            id: id,
             name: name,
             discription: discription,
             auther: auther
@@ -62,7 +65,7 @@ const updateBook = async (req, res) => {
         const data = await Book.find()
 
         res.json({
-            data: data
+            data: data,
         })
     } catch (error) {
         res.json({
