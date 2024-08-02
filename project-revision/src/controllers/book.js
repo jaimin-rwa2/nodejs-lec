@@ -2,11 +2,22 @@ const { Book } = require('../models/book')
 
 const getBooks = async (req, res) => {
     try {
-        const data = await Book.find()
 
-        res.json({
-            data: data
-        })
+        const login = req.cookies['login']
+        if (login) {
+            const data = await Book.find()
+
+            res.json({
+                data: data
+            })
+        } else {
+            res.json({
+                msg: "user is not logged in please login"
+            })
+        }
+
+
+
     } catch (error) {
         res.json({
             error: error

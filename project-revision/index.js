@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const cookieParse = require('cookie-parser')
 const { book_routes } = require('./src/routes/book')
+const { user_routes } = require('./src/routes/user')
 
 
 
@@ -11,6 +12,7 @@ dotenv.config()
 app.use(express.json())
 app.use(cookieParse())
 app.use('/book', book_routes)
+app.use('/user', user_routes)
 
 app.get('/set', (req, res) => {
 
