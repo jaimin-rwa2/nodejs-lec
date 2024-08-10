@@ -14,7 +14,14 @@ const registerUser = async (req, res) => {
     const username = req_body.username;
     const password = req_body.password;
 
-    const iPassword = await bcrypt.hashSync(password, salt)
+    const iPassword = bcrypt.hashSync(password, salt)
+    const dataExist = await User.findOne({ username: username })
+
+    if (dataExist) {
+        res.json({
+            "msg": "this user name is allready exist"
+        })
+    }
 
     await User.create({ username: username, password: iPassword })
 
