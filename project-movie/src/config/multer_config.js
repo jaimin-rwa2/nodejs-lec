@@ -13,5 +13,4 @@ const storage = multer.diskStorage({
 
 const multerConfig = multer({ storage: storage })
 
-
 module.exports = { multerConfig }
