@@ -35,7 +35,10 @@ const deleteMovies = async (req, res) => {
 
         const poster = movie.poster;
         const poster_path = path.join(__dirname, '../imgs', poster)
+        // if (fs.existsSync(poster_path)){
+        // }
         fs.unlinkSync(poster_path)
+
         await Movie.deleteOne({ _id: id })
 
         res.json({
