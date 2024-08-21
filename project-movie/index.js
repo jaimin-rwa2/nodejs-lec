@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const { movieRoutes } = require('./src/routes/movie')
+const { userRouter } = require('./src/routes/user')
 const { sendEmail } = require('./src/config/email_config')
 
 
@@ -9,8 +10,9 @@ const { sendEmail } = require('./src/config/email_config')
 const app = express()
 
 app.use(express.json())
-app.use('/movie/img', express.static('src/imgs'))
-app.use('/movie', movieRoutes)
+app.use('/movie/img', express.static('src/imgs'));
+app.use('/movie', movieRoutes);
+app.use('/user', userRouter);
 app.get('/email', (req, res) => {
 
     const to = req.body["email"]
