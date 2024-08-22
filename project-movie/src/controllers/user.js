@@ -27,8 +27,8 @@ const userLogin = async (req, res) => {
     const userData = await User.findOne({ username, password })
 
     if (userData) {
-        const tokenData = { username: userData["username"] }
-        const token = jwt.sign(tokenData, "asdf@1234", { expiresIn: "2m" })
+        const tokenData = { id: userData["_id"], username: userData["username"] }
+        const token = jwt.sign(tokenData, "asdf@1234", { expiresIn: "10m" })
 
         res.json({
             msg: "loggin success",
