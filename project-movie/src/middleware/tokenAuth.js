@@ -7,13 +7,12 @@ const authToken = (req, res, next) => {
         let verification = null;
         verification = jwt.verify(token, "asdf@1234")
         req.token = token
+        next();
     } catch (error) {
         res.json({
             msg: "token is not valid"
         })
     }
-
-    next();
 }
 
 

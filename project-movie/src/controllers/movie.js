@@ -6,31 +6,37 @@ const path = require('path')
 
 
 const createMovie = async (req, res) => {
-    if (req.token) {
-        const req_body = req.body;
-        console.log(req.file)
-        const poster = req.file['filename'];
-        const movieName = req_body['movie'];
-        const director = req_body['director'];
 
-        await Movie.create({ movieName, director, poster });
+    const req_body = req.body;
+    console.log(req.file)
+    const poster = req.file['filename'];
+    const movieName = req_body['movie'];
+    const director = req_body['director'];
 
-        res.json({
-            msg: "data created"
-        })
-    }
+    await Movie.create({ movieName, director, poster });
+
+    res.json({
+        msg: "data created"
+    })
 
 
 }
 
 const getMovies = async (req, res) => {
 
-    if (req.token) {
-        const movies = await Movie.find()
-        res.json({
-            movies: movies
-        })
-    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 2;
+    const startIndex = (page - 1) * limit;
+    const total = await Movie.countDocuments();
+
+    const movies = await Movie.find().skip(startIndex).limit(limit);
+    res.json({
+        page: page,
+        limit: limit,
+        total: total,
+        movies: movies
+    })
+
 
 
 }
