@@ -7,7 +7,7 @@ const userRegister = async (req, res) => {
     const data = req.body;
     const username = data['username'];
     const password = data['password'];
-
+    
     await User.create({ username, password });
 
     res.json({

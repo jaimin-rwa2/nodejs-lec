@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer')
-var smtpTransport = require('nodemailer-smtp-transport');
 
 
 const transporter = nodemailer.createTransport(
@@ -7,19 +6,20 @@ const transporter = nodemailer.createTransport(
         service: 'gmail',
         auth: {
             user: "rwa2.jaimin.jb@gmail.com",
-            pass: "qptaxkzgczwcxerr"
+            pass: "yqah sioz htii zzqb"
         }
     }
 )
 
 
-function sendEmail(to, subject, msg) {
+function sendEmail(to, subject, msg, html) {
     console.log("===============")
     transporter.sendMail({
         from: "rwa2.jaimin.jb@gmail.com",
         to: to,
         subject: subject,
-        text: msg
+        text: msg,
+        html: html
     })
 }
 

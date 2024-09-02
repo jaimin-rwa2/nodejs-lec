@@ -4,6 +4,7 @@ require('dotenv').config()
 const { movieRoutes } = require('./src/routes/movie')
 const { userRouter } = require('./src/routes/user')
 const { sendEmail } = require('./src/config/email_config')
+const { OTP_DATA } = require('./src/config/email_temps')
 
 
 
@@ -16,10 +17,19 @@ app.use('/user', userRouter);
 app.get('/email', (req, res) => {
 
     const to = req.body["email"]
-    let subject = "default"
-    let msg = "default"
+    let subject = OTP_DATA["OTP_SUBJECT"];
+    let msg = OTP_DATA["OTP_TEXT"];
+    let html_1 = OTP_DATA["OTP_HTML_1"];
+    let html_2 = OTP_DATA["OTP_HTML_2"];
 
-    sendEmail(to, subject, msg)
+    let otp = Math.round(Math.random() * 100000);
+    let html = `${html_1} ${otp} ${html_2}`
+
+    sendEmail(to, subject, msg, html)
+
+    res.json({
+        msg: "otp send"
+    })
 })
 
 
