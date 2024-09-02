@@ -28,17 +28,16 @@ const getMovies = async (req, res) => {
     const limit = parseInt(req.query.limit) || 2;
     const startIndex = (page - 1) * limit;
     const total = await Movie.countDocuments();
+    const total_pages = Math.ceil(total / limit)
 
     const movies = await Movie.find().skip(startIndex).limit(limit);
     res.json({
         page: page,
         limit: limit,
-        total: total,
+        total_data: total,
+        total_pages: total_pages,
         movies: movies
     })
-
-
-
 }
 
 
