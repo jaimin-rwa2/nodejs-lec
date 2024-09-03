@@ -22,21 +22,22 @@ const createMovie = async (req, res) => {
 
 }
 
+
 const getMovies = async (req, res) => {
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 2;
-    const startIndex = (page - 1) * limit;
-    const total = await Movie.countDocuments();
-    const total_pages = Math.ceil(total / limit)
+    const page = Number(req.query["page"]) || 1;
+    const dataLimit = Number(req.query["limit"]) || 2;
+    const skipCount = (page - 1) * dataLimit;
+    const totalData = await Movie.countDocuments()
+    const totalPages = Math.ceil(totalData / dataLimit)
 
-    const movies = await Movie.find().skip(startIndex).limit(limit);
+    const movies = await Movie.find().skip(skipCount).limit(dataLimit);
     res.json({
         page: page,
-        limit: limit,
-        total_data: total,
-        total_pages: total_pages,
-        movies: movies
+        limit: dataLimit,
+        total: totalData,
+        movies: movies,
+        totalPages: totalPages
     })
 }
 
