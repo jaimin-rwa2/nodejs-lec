@@ -12,8 +12,10 @@ const createMovie = async (req, res) => {
     const poster = req.file['filename'];
     const movieName = req_body['movie'];
     const director = req_body['director'];
+    const user = req.session.user["id"]
+    console.log(user)
 
-    await Movie.create({ movieName, director, poster });
+    await Movie.create({ movieName, director, poster, user });
 
     res.json({
         msg: "data created"

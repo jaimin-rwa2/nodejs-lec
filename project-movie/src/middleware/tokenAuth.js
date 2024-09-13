@@ -15,5 +15,22 @@ const authToken = (req, res, next) => {
     }
 }
 
+const authSession = (req, res, next) => {
+    try {
+        if (req.session.user) {
+            next();
+        } else {
+            res.json({
+                msg: "session dose not exist"
+            })
+        }
 
-module.exports = { authToken };
+    } catch (error) {
+        res.json({
+            msg: "token is not valid"
+        })
+    }
+}
+
+
+module.exports = { authToken, authSession };

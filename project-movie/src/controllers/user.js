@@ -7,7 +7,7 @@ const userRegister = async (req, res) => {
     const data = req.body;
     const username = data['username'];
     const password = data['password'];
-    
+
     await User.create({ username, password });
 
     res.json({
@@ -28,11 +28,13 @@ const userLogin = async (req, res) => {
 
     if (userData) {
         const tokenData = { id: userData["_id"], username: userData["username"] }
-        const token = jwt.sign(tokenData, "asdf@1234", { expiresIn: "10m" })
+        // const token = jwt.sign(tokenData, "asdf@1234", { expiresIn: "10m" })
+
+        req.session.user = { id: userData["_id"], username: userData["username"] }
 
         res.json({
             msg: "loggin success",
-            token: token
+            // token: token
         })
     } else {
         res.json({

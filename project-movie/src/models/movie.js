@@ -10,7 +10,10 @@ const movieSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    poster: String
+    poster: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId, ref: "User"
+    }
 })
 
 
