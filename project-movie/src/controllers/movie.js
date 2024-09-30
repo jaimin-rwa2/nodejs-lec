@@ -1,4 +1,5 @@
 const { Movie } = require('../models/movie');
+const { User } = require('../models/user');
 const fs = require('fs')
 const path = require('path')
 
@@ -12,7 +13,7 @@ const createMovie = async (req, res) => {
     const poster = req.file['filename'];
     const movieName = req_body['movie'];
     const director = req_body['director'];
-    const user = req.session.user["id"]
+    const user = req.user["id"]
     console.log(user)
 
     await Movie.create({ movieName, director, poster, user });
@@ -42,6 +43,25 @@ const getMovies = async (req, res) => {
         totalPages: totalPages
     })
 }
+
+const getMovie = async (req, res) => {
+
+    const id = req.params["id"];
+    const movies = await Movie.findOne({ _id: id }).populate({ path: 'user', select: 'username' });
+    res.json({
+        movies: movies,
+    })
+}
+
+const getMovieByUser = async (req, res) => {
+
+    const id = req.user["id"]
+
+    res.json({
+        user: id,
+    })
+}
+
 
 
 
@@ -117,4 +137,4 @@ const updateMovie = async (req, res) => {
 
 
 
-module.exports = { createMovie, getMovies, deleteMovies, updateMovie }
+module.exports = { createMovie, getMovie, getMovies, deleteMovies, updateMovie, getMovieByUser }

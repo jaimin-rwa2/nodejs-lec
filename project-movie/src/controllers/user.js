@@ -27,14 +27,14 @@ const userLogin = async (req, res) => {
     const userData = await User.findOne({ username, password })
 
     if (userData) {
-        const tokenData = { id: userData["_id"], username: userData["username"] }
-        // const token = jwt.sign(tokenData, "asdf@1234", { expiresIn: "10m" })
+        const tokenData = { id: userData["_id"] }
+        const token = jwt.sign(tokenData, "asdf@1234", { expiresIn: "10m" })
 
-        req.session.user = { id: userData["_id"], username: userData["username"] }
+        // req.session.user = { id: userData["_id"], username: userData["username"] }
 
         res.json({
             msg: "loggin success",
-            // token: token
+            token: token
         })
     } else {
         res.json({
