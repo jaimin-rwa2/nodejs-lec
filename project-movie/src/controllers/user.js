@@ -44,5 +44,13 @@ const userLogin = async (req, res) => {
 
 }
 
+const userForgotPassword = (req, res) => {
 
-module.exports = { userRegister, userLogin }
+}
+
+const userResetPassword = (req, res) => {
+
+}
+
+
+module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword }

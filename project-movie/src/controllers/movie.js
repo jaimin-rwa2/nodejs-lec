@@ -47,7 +47,9 @@ const getMovies = async (req, res) => {
 const getMovie = async (req, res) => {
 
     const id = req.params["id"];
-    const movies = await Movie.findOne({ _id: id }).populate({ path: 'user', select: 'username' });
+    const user_id = req.user["id"]
+    const movies = await Movie.findOne({ _id: id, user: user_id }).populate({ path: 'user', select: 'username' });
+
     res.json({
         movies: movies,
     })
@@ -56,9 +58,9 @@ const getMovie = async (req, res) => {
 const getMovieByUser = async (req, res) => {
 
     const id = req.user["id"]
-
+    const movies = await Movie.find({ user: id }).populate('user').exec();
     res.json({
-        user: id,
+        movies: movies,
     })
 }
 
