@@ -1,6 +1,6 @@
 const express = require("express")
 const { authToken } = require("../middleware/tokenAuth")
-const { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword } = require("../controllers/user")
+const { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword, userLogout } = require("../controllers/user")
 
 
 const userRouter = express.Router()
@@ -8,6 +8,7 @@ const userRouter = express.Router()
 
 userRouter.post('/register', userRegister);
 userRouter.post('/login', userLogin);
+userRouter.post('/logout', userLogout);
 userRouter.post('/forgot_password', userForgotPassword);
 userRouter.post('/forgot_password/otp', userOTPForgotPassword);
 userRouter.post('/reset_password', authToken, userResetPassword);
