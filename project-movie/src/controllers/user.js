@@ -130,5 +130,11 @@ const userResetPassword = async (req, res) => {
 
 }
 
+const userLogout = (req, res) => {
+    res.json({
+        msg: "user logged out successfully"
+    })
+}
 
-module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword }
+
+module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword, userLogout }
