@@ -12,7 +12,7 @@ const userRegister = async (req, res) => {
 
     await User.create({ username, password });
 
-    res.json({
+    res.status(201).json({
         msg: "user created"
     })
 
