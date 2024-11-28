@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Flash Messages Example</title>
+</head>
+
+<body>
+    <h1>Flash Messages Example</h1>
+
+    <% if (messages.length> 0) { %>
+        <div class="flash-messages">
+            <% messages.forEach(message=> { %>
+                <div class="flash-message">
+                    <%= message %>
+                </div>
+                <% }); %>
+        </div>
+        <% } %>
+
+            <a href="/show-flash-message">Show Flash Message</a>
+</body>
+
+</html>
