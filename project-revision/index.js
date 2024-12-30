@@ -1,18 +1,16 @@
+equire('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
-const dotenv = require('dotenv')
 const cookieParse = require('cookie-parser')
-const { book_routes } = require('./src/routes/book')
-const { user_routes } = require('./src/routes/user')
-
-
+const errorHandler =require("./src/middlewares/errorHandler")
 
 const app = express()
-dotenv.config()
 app.use(express.json())
 app.use(cookieParse())
-app.use('/book', book_routes)
-app.use('/user', user_routes)
+// app.use(express.urlencoded({extended: false}))
+app.use(express.static(path.join(__dirname, "public")))
+
+app.use('/user', require('./src/routes/user'))
 
 app.get('/set', (req, res) => {
 
@@ -30,10 +28,17 @@ app.get('/get', (req, res) => {
     })
 })
 
+app.all("*", (req, res)=>{
+    res.status(404).json({
+            error: "404 not found"
+        });
+})
 
+app.use(errorHandler)
 
 
 app.listen(process.env.PORT, () => {
     mongoose.connect(process.env.MONGO_URL)
-    console.log(`server started at http://localhost:${process.env.PORT}/`)
+    console.log('DB Connected');
+    console.log(`server is running on http://${process.env.HOST}:${process.env.PORT}/}`)
 })
