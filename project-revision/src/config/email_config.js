@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport(
     {
         service: 'gmail',
         auth: {
-            user: "rwa2.jaimin.jb@gmail.com",
-            pass: "yqah sioz htii zzqb"
+            user: process.env.SENDER_EMAIL,
+            pass: process.env.EMAIL_PASSWORD
         }
     }
 )
@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport(
 function sendEmail(to, subject, msg, html) {
     console.log("===============")
     transporter.sendMail({
-        from: "rwa2.jaimin.jb@gmail.com",
+        from: process.env.SENDER_EMAIL,
         to: to,
         subject: subject,
         text: msg,

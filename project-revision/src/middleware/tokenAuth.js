@@ -5,7 +5,7 @@ const authToken = (req, res, next) => {
     try {
         const token = req.header('Authorization').split(" ")[1]
         let verification = null;
-        verification = jwt.verify(token, "asdf@1234")
+        verification = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
         req.user = { id: verification["id"] }
 

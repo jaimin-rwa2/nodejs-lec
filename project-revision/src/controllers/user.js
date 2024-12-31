@@ -45,10 +45,10 @@ const userLogin = async (req, res) => {
     const passOk = bcrypt.compareSync(password, user.password)
 
     if (passOk) {
-        const tokenData = { id: userData["_id"] }
+        const tokenData = { id: user["_id"], username:  user["username"]}
         const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
         const refreshToken = jwt.sign(tokenData, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
-        res.cookie("jwt", refreshToken, {httpOnly: true, maxAge: 24*60*60*1000})
+        res.cookie("jwt", refreshToken, {httpOnly: true, secure: true, maxAge: 24*60*60*1000})
         res.json({
             "msg": "login succesfully",
             accessToken: accessToken
@@ -58,6 +58,31 @@ const userLogin = async (req, res) => {
             "msg": "login fail, password or username is wrong"
         })
     }
+}
+
+
+const userRefreshToken = async (req, res) => {
+
+    const cookies = req.cookies
+
+    if(!cookies?.jwt) return res.status(401).json({msg: "Refresh Token Expired or not found"})
+    
+    const refreshToken = cookies.jwt;
+    const refreshTokenData = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+    
+    const user = await User.findOne({ _id: refreshTokenData["id"] })
+
+    if(!user) return res.status(401).json({msg: "User not found"})
+
+
+    if (user.username !== tokenData.username) return res.status(403).json({msg: "Refresh Token is invalid"})
+
+    const tokenData = { id: user["_id"], username:  user["username"]}
+    const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
+    res.json({
+        "msg": "login succesfully",
+        accessToken: accessToken
+    })
 }
 
 
@@ -121,7 +146,7 @@ const userResetPassword = async (req, res) => {
     const { old_password, new_password } = req.body;
     const id = req.user["id"];
 
-    if (old_password == new_password) {
+    if (old_password === new_password) {
         res.json({
             msg: "same as previous password"
         })
@@ -143,7 +168,11 @@ const userResetPassword = async (req, res) => {
 
 }
 
-const userLogout = (req, res) => {
+const userLogout =  async (req, res) => {
+    const cookies = req.cookies
+
+    if(!cookies?.jwt) return res.status(204).json({msg: "Refresh Token not found"})
+    res.clearCookie("jwt", {httpOnly: true, secure: true});
     res.json({
         msg: "user logged out successfully"
     })
@@ -158,6 +187,6 @@ const getUsers = async (req, res) => {
 
 }
 
-module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword, userLogout, getUsers }
+module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword, userLogout, getUsers, userRefreshToken }
 
 

@@ -1,15 +1,22 @@
-equire('dotenv').config()
+require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const cookieParse = require('cookie-parser')
-const errorHandler =require("./src/middlewares/errorHandler")
+const cors = require('cors')
+const path = require('path')
+const errorHandler =require("./src/middleware/errorHandler")
+const corsOptions =require("./src/config/corsConfig")
 
 const app = express()
+
+app.use(cors(corsOptions))
+
 app.use(express.json())
 app.use(cookieParse())
 // app.use(express.urlencoded({extended: false}))
 app.use(express.static(path.join(__dirname, "public")))
 
+// app.use(authToken)  // this will apply auth on all below API
 app.use('/user', require('./src/routes/user'))
 
 app.get('/set', (req, res) => {
@@ -40,5 +47,5 @@ app.use(errorHandler)
 app.listen(process.env.PORT, () => {
     mongoose.connect(process.env.MONGO_URL)
     console.log('DB Connected');
-    console.log(`server is running on http://${process.env.HOST}:${process.env.PORT}/}`)
+    console.log(`server is running on http://${process.env.HOST}:${process.env.PORT}/`)
 })
