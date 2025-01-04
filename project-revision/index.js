@@ -15,6 +15,8 @@ app.use(express.json())
 app.use(cookieParse())
 // app.use(express.urlencoded({extended: false}))
 app.use(express.static(path.join(__dirname, "public")))
+app.disable("x-powered-by")
+
 
 // app.use(authToken)  // this will apply auth on all below API
 app.use('/user', require('./src/routes/user'))

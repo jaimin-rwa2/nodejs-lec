@@ -7,48 +7,82 @@ const { OTP_DATA } = require('../config/email_temps')
 
 const salt = bcrypt.genSaltSync(10)
 
+
+/** POST: user/register
+        * @param :  {
+            "username": "",
+            "password": "",
+            "email": "",
+            "firstname": "",
+            "lastname": "",
+            "mobile": "",
+            "address": "",
+            "profile": "",
+        }
+    */
 const userRegister = async (req, res) => {
+    try {
+        const startTime = new Date();
+        const { username, password, email } = req.body;
 
-    const {username, password} = req.body;
+        // Add Email Authentication Here.
 
-    // Add Email Authentication Here.
+        if (!username || !password || !email) return res.status(400).json({ msg: "Username, Password email are required." })
 
-    if(!username || !password) return res.status(400).json({msg: "Username and Password are required."})
 
-    const hashPassword = bcrypt.hashSync(password, salt)
-    const userExist = await User.findOne({ username: username }).exist()
+        const { usernameExist, emailExist } = Promise.all([
+            User.findOne({ username: username }).exist,
+            User.findOne({ email: email }).exist
+        ])-
+        // const usernameExist = await User.findOne({ username: username }).exist
+        // const emailExist = await User.findOne({ email: email }).exist
 
-    if (userExist) {
-        res.json({
-            "msg": "this user name is allready exist"
+
+        if (usernameExist) {
+            res.json({
+                "msg": "this username is allready exist"
+            })
+        }
+
+        if (emailExist) {
+            res.json({
+                "msg": "this email is allready exist"
+            })
+        }
+
+        const hashPassword = bcrypt.hashSync(password, salt)
+        await User.create({ username: username, password: hashPassword, email: email })
+
+
+        const endTime = new Date();
+        console.log('Time with Promise.all:', endTime - startTime, 'ms');
+        res.status(201).json({
+            "msg": "user created succesfully"
         })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ "msg": "error creating user" })
     }
-
-    await User.create({ username: username, password: hashPassword })
-
-    res.status(201).json({
-        "msg": "user created succesfully"
-    })
-
 }
 
 const userLogin = async (req, res) => {
 
-    const {username, password} = req.body;
+    const { username, password } = req.body;
 
-    if(!username || !password) return res.status(400).json({msg: "Username and Password are required."})
+    if (!username || !password) return res.status(400).json({ msg: "Username and Password are required." })
 
     const user = await User.findOne({ username: username })
 
-    if(!user) return res.status(401).json({msg: "User not found"})
+    if (!user) return res.status(401).json({ msg: "User not found" })
 
     const passOk = bcrypt.compareSync(password, user.password)
 
     if (passOk) {
-        const tokenData = { id: user["_id"], username:  user["username"]}
+        const tokenData = { id: user["_id"], username: user["username"] }
         const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
         const refreshToken = jwt.sign(tokenData, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
-        res.cookie("jwt", refreshToken, {httpOnly: true, secure: true, maxAge: 24*60*60*1000})
+        res.cookie("jwt", refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 })
         res.json({
             "msg": "login succesfully",
             accessToken: accessToken
@@ -65,19 +99,19 @@ const userRefreshToken = async (req, res) => {
 
     const cookies = req.cookies
 
-    if(!cookies?.jwt) return res.status(401).json({msg: "Refresh Token Expired or not found"})
-    
+    if (!cookies?.jwt) return res.status(401).json({ msg: "Refresh Token Expired or not found" })
+
     const refreshToken = cookies.jwt;
     const refreshTokenData = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
-    
+
     const user = await User.findOne({ _id: refreshTokenData["id"] })
 
-    if(!user) return res.status(401).json({msg: "User not found"})
+    if (!user) return res.status(401).json({ msg: "User not found" })
 
 
-    if (user.username !== tokenData.username) return res.status(403).json({msg: "Refresh Token is invalid"})
+    if (user.username !== tokenData.username) return res.status(403).json({ msg: "Refresh Token is invalid" })
 
-    const tokenData = { id: user["_id"], username:  user["username"]}
+    const tokenData = { id: user["_id"], username: user["username"] }
     const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
     res.json({
         "msg": "login succesfully",
@@ -88,7 +122,7 @@ const userRefreshToken = async (req, res) => {
 
 const otp_data = {}
 
-const userOTPForgotPassword = async (req, res) => {
+const generateOTP = async (req, res) => {
     const to = req.body["email"]
     const username = req.body["username"]
 
@@ -168,11 +202,11 @@ const userResetPassword = async (req, res) => {
 
 }
 
-const userLogout =  async (req, res) => {
+const userLogout = async (req, res) => {
     const cookies = req.cookies
 
-    if(!cookies?.jwt) return res.status(204).json({msg: "Refresh Token not found"})
-    res.clearCookie("jwt", {httpOnly: true, secure: true});
+    if (!cookies?.jwt) return res.status(204).json({ msg: "Refresh Token not found" })
+    res.clearCookie("jwt", { httpOnly: true, secure: true });
     res.json({
         msg: "user logged out successfully"
     })
@@ -187,6 +221,6 @@ const getUsers = async (req, res) => {
 
 }
 
-module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, userOTPForgotPassword, userLogout, getUsers, userRefreshToken }
+module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, generateOTP, userLogout, getUsers, userRefreshToken }
 
 
