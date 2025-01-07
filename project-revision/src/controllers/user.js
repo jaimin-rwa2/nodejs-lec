@@ -23,7 +23,7 @@ const salt = bcrypt.genSaltSync(10)
 const userRegister = async (req, res) => {
     try {
         const startTime = new Date();
-        const { username, password, email } = req.body;
+        const { username, password, email, profilePic } = req.body;
 
         // Add Email Authentication Here.
 
@@ -31,9 +31,10 @@ const userRegister = async (req, res) => {
 
 
         const { usernameExist, emailExist } = Promise.all([
+            // error handol here
             User.findOne({ username: username }).exist,
             User.findOne({ email: email }).exist
-        ])-
+        ])
         // const usernameExist = await User.findOne({ username: username }).exist
         // const emailExist = await User.findOne({ email: email }).exist
 
