@@ -29,24 +29,43 @@ const userRegister = async (req, res) => {
 
         if (!username || !password || !email) return res.status(400).json({ msg: "Username, Password email are required." })
 
+        // const { usernameExist, emailExist } = await Promise.all([
+        //     new Promise((resolve) => {
+        //         User.findOne({ username })
+        //           .then((user) => resolve(user)) // Resolve with true if user exists, false otherwise
+        //           .catch((error) => {
+        //             console.error('Error checking username existence:', error);
+        //             resolve(false); // Resolve with false on error
+        //           });
+        //       }),
+        //       new Promise((resolve) => {
+        //         User.findOne({ email })
+        //           .then((user) => resolve(!!user)) // Resolve with true if user exists, false otherwise
+        //           .catch((error) => {
+        //             console.error('Error checking email existence:', error);
+        //             resolve(false); // Resolve with false on error
+        //           });
+        //       })
+        // ])
+        // const { usernameExist, emailExist } = await Promise.all([
+        //     // error handol here
+        //     await User.exists({ username: username }),
+        //     await User.exists({ email: email })
+        // ])
+        const usernameExist = await User.exists({ username: username });
+        const emailExist = await User.exists({ email: email });
 
-        const { usernameExist, emailExist } = Promise.all([
-            // error handol here
-            User.findOne({ username: username }).exist,
-            User.findOne({ email: email }).exist
-        ])
-        // const usernameExist = await User.findOne({ username: username }).exist
-        // const emailExist = await User.findOne({ email: email }).exist
-
+        console.log(usernameExist)
+        console.log(emailExist)
 
         if (usernameExist) {
-            res.json({
+            return res.json({
                 "msg": "this username is allready exist"
             })
         }
 
         if (emailExist) {
-            res.json({
+            return res.json({
                 "msg": "this email is allready exist"
             })
         }
@@ -57,23 +76,23 @@ const userRegister = async (req, res) => {
 
         const endTime = new Date();
         console.log('Time with Promise.all:', endTime - startTime, 'ms');
-        res.status(201).json({
+        return res.status(201).json({
             "msg": "user created succesfully"
         })
 
     } catch (error) {
         console.error(error)
-        res.status(500).json({ "msg": "error creating user" })
+        return res.status(500).json({ "msg": "error creating user" })
     }
 }
 
 const userLogin = async (req, res) => {
 
-    const { username, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!username || !password) return res.status(400).json({ msg: "Username and Password are required." })
+    if (!identifier || !password) return res.status(400).json({ msg: "Username or Email and Password are required." })
 
-    const user = await User.findOne({ username: username })
+    const user = await User.findOne({ $or: [{ email: identifier}, { username: identifier}]})
 
     if (!user) return res.status(401).json({ msg: "User not found" })
 
@@ -86,11 +105,12 @@ const userLogin = async (req, res) => {
         res.cookie("jwt", refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 })
         res.json({
             "msg": "login succesfully",
-            accessToken: accessToken
+            accessToken: accessToken,
+            username: user["username"]
         })
     } else {
         res.json({
-            "msg": "login fail, password or username is wrong"
+            "msg": "login fail, password wrong"
         })
     }
 }

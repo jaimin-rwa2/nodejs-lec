@@ -23,7 +23,10 @@ const userSchema = new mongoose.Schema({
     lastName: String,
     mobile: Number,
     address: String,
-    profilePic: String,
+    profilePic: {
+        type: String, 
+        default: ''
+    },
 }, {      
     timestamps: true,
     versionKey: false
