@@ -30,33 +30,12 @@ const userRegister = async (req, res) => {
         if (!username || !password || !email) return res.status(400).json({ msg: "Username, Password email are required." })
 
         // const { usernameExist, emailExist } = await Promise.all([
-        //     new Promise((resolve) => {
-        //         User.findOne({ username })
-        //           .then((user) => resolve(user)) // Resolve with true if user exists, false otherwise
-        //           .catch((error) => {
-        //             console.error('Error checking username existence:', error);
-        //             resolve(false); // Resolve with false on error
-        //           });
-        //       }),
-        //       new Promise((resolve) => {
-        //         User.findOne({ email })
-        //           .then((user) => resolve(!!user)) // Resolve with true if user exists, false otherwise
-        //           .catch((error) => {
-        //             console.error('Error checking email existence:', error);
-        //             resolve(false); // Resolve with false on error
-        //           });
-        //       })
-        // ])
-        // const { usernameExist, emailExist } = await Promise.all([
         //     // error handol here
         //     await User.exists({ username: username }),
         //     await User.exists({ email: email })
         // ])
         const usernameExist = await User.exists({ username: username });
         const emailExist = await User.exists({ email: email });
-
-        console.log(usernameExist)
-        console.log(emailExist)
 
         if (usernameExist) {
             return res.json({
@@ -87,30 +66,37 @@ const userRegister = async (req, res) => {
 }
 
 const userLogin = async (req, res) => {
-
-    const { identifier, password } = req.body;
-
-    if (!identifier || !password) return res.status(400).json({ msg: "Username or Email and Password are required." })
-
-    const user = await User.findOne({ $or: [{ email: identifier}, { username: identifier}]})
-
-    if (!user) return res.status(401).json({ msg: "User not found" })
-
-    const passOk = bcrypt.compareSync(password, user.password)
-
-    if (passOk) {
-        const tokenData = { id: user["_id"], username: user["username"] }
-        const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
-        const refreshToken = jwt.sign(tokenData, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
-        res.cookie("jwt", refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 })
-        res.json({
-            "msg": "login succesfully",
-            accessToken: accessToken,
-            username: user["username"]
-        })
-    } else {
-        res.json({
-            "msg": "login fail, password wrong"
+    try {
+        const { identifier, password } = req.body;
+    
+        if (!identifier || !password) return res.status(400).json({ msg: "Username or Email and Password are required." })
+    
+        const user = await User.findOne({ $or: [{ email: identifier}, { username: identifier}]})
+    
+        if (!user) return res.status(401).json({ msg: "User not found" })
+    
+        const passOk = bcrypt.compareSync(password, user.password)
+    
+        if (passOk) {
+            let username = user["username"];
+            const tokenData = { id: user["_id"], username: username}
+            const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
+            const refreshToken = jwt.sign(tokenData, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
+            res.cookie("jwt", refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 })
+            res.json({
+                "msg": "login succesfully",
+                accessToken: accessToken,
+                username: username
+            })
+        } else {
+            res.status(500).json({
+                "msg": "login fail, password wrong"
+            })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in user login"
         })
     }
 }
@@ -118,88 +104,115 @@ const userLogin = async (req, res) => {
 
 const userRefreshToken = async (req, res) => {
 
-    const cookies = req.cookies
+    try {
+        const cookies = req.cookies
+    
+        if (!cookies?.jwt) return res.status(401).json({ msg: "Refresh Token Expired or not found" })
+    
+        const refreshToken = cookies.jwt;
+        const refreshTokenData = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+    
+        const user = await User.findOne({ _id: refreshTokenData["id"] })
+    
+        if (!user) return res.status(401).json({ msg: "User not found" })
+    
+    
+        if (user.username !== tokenData.username) return res.status(403).json({ msg: "Refresh Token is invalid" })
+    
+        const tokenData = { id: user["_id"], username: user["username"] }
+        const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
+        res.json({
+            "msg": "login succesfully",
+            accessToken: accessToken
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in user refresh token"
+        })
+    }
 
-    if (!cookies?.jwt) return res.status(401).json({ msg: "Refresh Token Expired or not found" })
-
-    const refreshToken = cookies.jwt;
-    const refreshTokenData = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
-
-    const user = await User.findOne({ _id: refreshTokenData["id"] })
-
-    if (!user) return res.status(401).json({ msg: "User not found" })
-
-
-    if (user.username !== tokenData.username) return res.status(403).json({ msg: "Refresh Token is invalid" })
-
-    const tokenData = { id: user["_id"], username: user["username"] }
-    const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
-    res.json({
-        "msg": "login succesfully",
-        accessToken: accessToken
-    })
 }
 
 
 const otp_data = {}
 
 const generateOTP = async (req, res) => {
-    const to = req.body["email"]
-    const username = req.body["username"]
 
-    const user = await User.findOne({ username: username })
-    if (!user) {
-        res.json({
-            msg: "user not found"
-        })
-    } else {
-        let subject = OTP_DATA["OTP_SUBJECT"];
-        let msg = OTP_DATA["OTP_TEXT"];
-        let html_1 = OTP_DATA["OTP_HTML_1"];
-        let html_2 = OTP_DATA["OTP_HTML_2"];
-
-        let otp = Math.round(Math.random() * 100000);
-
-        otp_data[to] = { otp: otp, time: Date.now() };
-
-        let html = `${html_1} ${otp} ${html_2}`
-
-        sendEmail(to, subject, msg, html)
-
-        console.log(otp_data)
-        res.json({
-            msg: "otp send"
+    try {
+        const to = req.body["email"]
+        const username = req.body["username"]
+    
+        const user = await User.findOne({ username: username })
+        if (!user) {
+            res.json({
+                msg: "user not found"
+            })
+        } else {
+            let subject = OTP_DATA["OTP_SUBJECT"];
+            let msg = OTP_DATA["OTP_TEXT"];
+            let html_1 = OTP_DATA["OTP_HTML_1"];
+            let html_2 = OTP_DATA["OTP_HTML_2"];
+    
+            let otp = Math.round(Math.random() * 100000);
+    
+            otp_data[to] = { otp: otp, time: Date.now() };
+    
+            let html = `${html_1} ${otp} ${html_2}`
+    
+            sendEmail(to, subject, msg, html)
+    
+            console.log(otp_data)
+            res.json({
+                msg: "otp send"
+            })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in generating OTP"
         })
     }
 }
 
 const userForgotPassword = async (req, res) => {
-    const { username, email, otp, new_password } = req.body;
-    console.log(otp_data[email])
-    if (!otp_data[email]) {
-        res.json({
-            msg: "email is wrong"
-        })
-    } else if (otp_data[email]["otp"] == otp && (Date.now() - otp_data[email]["time"] <= 60000)) {
-        delete otp_data[email];
 
-        await User.updateOne({ username: username }, { password: new_password })
-
-        res.json({
-            msg: "password updated"
-        })
-    } else {
-        res.json({
-            msg: "otp is wrong"
+    try {
+        const { username, email, otp, new_password } = req.body;
+        console.log(otp_data[email])
+        if (!otp_data[email]) {
+            res.json({
+                msg: "email is wrong"
+            })
+        } else if (otp_data[email]["otp"] == otp && (Date.now() - otp_data[email]["time"] <= 60000)) {
+            delete otp_data[email];
+    
+            await User.updateOne({ username: username }, { password: new_password })
+    
+            res.json({
+                msg: "password updated"
+            })
+        } else {
+            res.json({
+                msg: "otp is wrong"
+            })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in Forgot Password"
         })
     }
+
 
 
 }
 
 const userResetPassword = async (req, res) => {
-    const { old_password, new_password } = req.body;
-    const id = req.user["id"];
+
+    try {
+        const { old_password, new_password } = req.body;
+        const id = req.user["id"];
 
     if (old_password === new_password) {
         res.json({
@@ -219,28 +232,83 @@ const userResetPassword = async (req, res) => {
             msg: "password updated succesfully"
         })
     }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in ResetPassword"
+        })
+    }
+    
 
 
 }
 
 const userLogout = async (req, res) => {
-    const cookies = req.cookies
+    try {
+        const cookies = req.cookies
 
-    if (!cookies?.jwt) return res.status(204).json({ msg: "Refresh Token not found" })
-    res.clearCookie("jwt", { httpOnly: true, secure: true });
-    res.json({
-        msg: "user logged out successfully"
-    })
+        if (!cookies?.jwt) return res.status(204).json({ msg: "Refresh Token not found" })
+        res.clearCookie("jwt", { httpOnly: true, secure: true });
+        res.json({
+            msg: "user logged out successfully"
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in logout"
+        })
+    }
 }
 
 
 const getUsers = async (req, res) => {
 
-    const users = await User.find()
+    try {
+        const users = await User.find()
 
-    res.json({ "users": users })
+        res.json({ "users": users })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in getting users"
+        })
+    }
+
+   
 
 }
+
+const getUser = async (req, res) => {
+
+    try {
+        const userId = req.params["userId"]
+
+        const user = await User.findById(userId)
+
+        // const {password, ...restUserData} = user;  // can not pass directly, give us unnecessary response
+        const {password, ...restUserData} = Object.assign({}, user.toJSON());
+
+        res.json({ "user": restUserData })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in getting user"
+        })
+    }
+}
+
+const updateUser = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            "msg": "Error in Update user"
+        })
+    }
+}
+
 
 module.exports = { userRegister, userLogin, userForgotPassword, userResetPassword, generateOTP, userLogout, getUsers, userRefreshToken }
 
