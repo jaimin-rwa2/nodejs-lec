@@ -5,6 +5,10 @@ const { userRegister, userLogin, userForgotPassword, userResetPassword, generate
 
 const route = express.Router()
 
+
+// route.use(authToken)  // this will apply auth on all below API
+
+
 route.get('/', getUsers)
 // route.get('/:user_id', getUser)
 // route.put('/:user_id', updateUser)

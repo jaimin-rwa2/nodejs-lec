@@ -14,11 +14,15 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParse())
 // app.use(express.urlencoded({extended: false}))
-app.use(express.static(path.join(__dirname, "public")))
 app.disable("x-powered-by")
 
+app.use(express.static(path.join(__dirname, "public")))
 
-// app.use(authToken)  // this will apply auth on all below API
+/* 
+    TODO: if folder in public donse not exist then create them
+*/
+
+
 app.use('/user', require('./src/routes/user'))
 
 app.get('/set', (req, res) => {
