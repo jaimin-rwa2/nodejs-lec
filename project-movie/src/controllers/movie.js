@@ -34,7 +34,7 @@ const getMovies = async (req, res) => {
     const totalData = await Movie.countDocuments()
     const totalPages = Math.ceil(totalData / dataLimit)
 
-    const movies = await Movie.find().skip(skipCount).limit(dataLimit);
+    const movies = await Movie.find().skip(skipCount).limit(dataLimit).populate("comments").populate("user");
     res.json({
         page: page,
         limit: dataLimit,
@@ -48,7 +48,7 @@ const getMovie = async (req, res) => {
 
     const id = req.params["id"];
     const user_id = req.user["id"]
-    const movies = await Movie.findOne({ _id: id, user: user_id }).populate({ path: 'user', select: 'username' });
+    const movies = await Movie.findOne({ _id: id }).populate('comments');
 
     res.json({
         movies: movies,

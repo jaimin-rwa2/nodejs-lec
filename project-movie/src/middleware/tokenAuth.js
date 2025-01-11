@@ -12,7 +12,7 @@ const authToken = (req, res, next) => {
         req.token = token
         next();
     } catch (error) {
-        res.json({
+        res.status(401).json({
             msg: "token is not valid"
         })
     }
