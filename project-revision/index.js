@@ -6,9 +6,11 @@ const cors = require('cors')
 const path = require('path')
 const errorHandler =require("./src/middleware/errorHandler")
 const corsOptions =require("./src/config/corsConfig")
+const credentials = require("./src/middleware/credentials")
 
 const app = express()
 
+app.use(credentials)
 app.use(cors(corsOptions))
 
 app.use(express.json())

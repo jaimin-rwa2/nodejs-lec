@@ -24,7 +24,7 @@ const userRegister = async (req, res) => {
     try {
         const startTime = new Date();
         const { username, password, email } = req.body;
-        
+
         // Add Email Authentication Here.
 
         if (!username || !password || !email) return res.status(400).json({ msg: "Username, Password email are required." })
@@ -56,7 +56,7 @@ const userRegister = async (req, res) => {
         }
 
         const hashPassword = bcrypt.hashSync(password, salt)
-        await User.create({ username: username, password: hashPassword, email: email, profilePic: profilePic})
+        await User.create({ username: username, password: hashPassword, email: email, profilePic: profilePic })
 
 
         const endTime = new Date();
@@ -88,7 +88,9 @@ const userLogin = async (req, res) => {
             const tokenData = { id: user["_id"], username: username }
             const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
             const refreshToken = jwt.sign(tokenData, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
-            res.cookie("jwt", refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 })
+            // also need to set sameSite : 'None', otherwise frontend did not accepts refresh token as cookie
+            // and then they say secure must be true
+            res.cookie("jwt", refreshToken, { httpOnly: true, sameSite: "None", secure: true, maxAge: 24 * 60 * 60 * 1000 })
             return res.json({
                 "msg": "login succesfully",
                 accessToken: accessToken,
@@ -254,7 +256,7 @@ const userLogout = async (req, res) => {
         const cookies = req.cookies
 
         if (!cookies?.jwt) return res.status(204).json({ msg: "Refresh Token not found" })
-        res.clearCookie("jwt", { httpOnly: true, secure: true });
+        res.clearCookie("jwt", { httpOnly: true, sameSite: "None",secure: true });
         return res.json({
             msg: "user logged out successfully"
         })
