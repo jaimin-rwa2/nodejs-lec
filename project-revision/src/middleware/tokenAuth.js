@@ -3,13 +3,11 @@ const jwt = require("jsonwebtoken")
 
 const authToken = (req, res, next) => {
     try {
+        // req.headers["Authorization"] ???
+        const authorization = req.header('Authorization')
+        if (!authorization?.startsWith('Bearer ')) return res.status(401).json({msg: "Invalid authorization"})
         const token = req.header('Authorization').split(" ")[1]
-        let verification = null;
-        verification = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-
-        req.user = { id: verification["id"] }
-
-        req.token = token
+        req.user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         next();
     } catch (error) {
         res.status(401).json({

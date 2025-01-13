@@ -85,7 +85,7 @@ const userLogin = async (req, res) => {
 
         if (passOk) {
             let username = user["username"];
-            const tokenData = { id: user["_id"], username: username }
+            const tokenData = { id: user["_id"], username: username, roles: user["roles"] }
             const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })
             const refreshToken = jwt.sign(tokenData, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1d" })
             // also need to set sameSite : 'None', otherwise frontend did not accepts refresh token as cookie
@@ -125,7 +125,7 @@ const userRefreshToken = async (req, res) => {
         if (!user) return res.status(401).json({ msg: "User not found" })
 
 
-        if (user.username !== tokenData.username) return res.status(403).json({ msg: "Refresh Token is invalid" })
+        if (user.username !== refreshTokenData.username && user._id !== refreshTokenData.id) return res.status(403).json({ msg: "Refresh Token is invalid" })
 
         const tokenData = { id: user["_id"], username: user["username"] }
         const accessToken = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "5m" })

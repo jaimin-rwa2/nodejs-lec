@@ -1,6 +1,8 @@
 const express = require('express')
 const { authToken } = require("../middleware/tokenAuth")
 const { userRegister, userLogin, userForgotPassword, userResetPassword, generateOTP, userLogout, getUsers, userRefreshToken } = require("../controllers/user")
+const verifyRoles = require("../middleware/verifyRoles")
+const ROLES_LIST = require("../config/roles_list")
 
 
 const route = express.Router()
@@ -11,7 +13,7 @@ const route = express.Router()
 
 route.get('/', getUsers)
 // route.get('/:user_id', getUser)
-// route.put('/:user_id', updateUser)
+// route.put('/:user_id', verifyRoles(ROLES_LIST.admin, ROLES_LIST.user) updateUser)
 // route.delete('/:user_id', deleteUser)
 route.post('/register', userRegister)
 // route.post('/register-main', mailRegister)
